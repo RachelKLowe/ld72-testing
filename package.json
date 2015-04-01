@@ -7,6 +7,7 @@
   "dependencies": {},
 
   "devDependencies": {
+    "babel": "*",
     "bower": "*",
     "gulp": "*",
     "gulp-util": "*",
@@ -16,7 +17,8 @@
     "gulp-minify-css": "*",
     "gulp-minify-html": "*",
     "gulp-processhtml": "*",
-    "gulp-jshint": "*",
+    "gulp-eslint": "*",
+    "gulp-babel": "*",
     "gulp-uglify": "*",
     "gulp-connect": "*",
     "gulp-watch": "*",
