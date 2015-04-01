@@ -6,7 +6,8 @@ var gulp = require('gulp')
   , minifycss = require('gulp-minify-css')
   , minifyhtml = require('gulp-minify-html')
   , processhtml = require('gulp-processhtml')
-  , jshint = require('gulp-jshint')
+  , eslint = require('gulp-eslint')
+  , babel = require('gulp-babel')
   , uglify = require('gulp-uglify')
   , connect = require('gulp-connect')
   , paths;
@@ -39,6 +40,7 @@ gulp.task('copy-vendor', ['clean'], function () {
 
 gulp.task('uglify', ['clean','lint'], function () {
   gulp.src(paths.js)
+    .pipe(babel())
     .pipe(concat('main.min.js'))
     .pipe(gulp.dest(paths.dist))
     .pipe(uglify({outSourceMaps: false}))
@@ -71,10 +73,14 @@ gulp.task('minifyhtml', ['clean'], function() {
 });
 
 gulp.task('lint', function() {
-  gulp.src(paths.js)
-    .pipe(jshint('.jshintrc'))
-    .pipe(jshint.reporter('default'))
-    .on('error', gutil.log);
+  return gulp.src(paths.js)
+    .pipe(eslint({
+      envs: [
+          'es6'
+      ]
+    }))
+    .pipe(eslint.format())
+    .pipe(eslint.failOnError());
 });
 
 gulp.task('html', function(){
