@@ -15,8 +15,10 @@ var gulp = require('gulp')
 paths = {
   assets: 'src/assets/**/*',
   css:    'src/css/*.css',
+  html:   'src/*.html',
   libs:   [
-    'src/bower_components/phaser-official/build/phaser.min.js'
+    'src/bower_components/phaser-official/build/phaser.min.js',
+    'src/bower_components/phaser-official/build/phaser.map'
   ],
   js:     ['src/js/**/*.js'],
   dist:   './dist/'
@@ -38,7 +40,7 @@ gulp.task('copy-vendor', ['clean'], function () {
     .on('error', gutil.log);
 });
 
-gulp.task('uglify', ['clean','lint'], function () {
+gulp.task('uglify', ['clean'], function () {
   gulp.src(paths.js)
     .pipe(babel())
     .pipe(concat('main.min.js'))
@@ -58,20 +60,6 @@ gulp.task('minifycss', ['clean'], function () {
     .on('error', gutil.log);
 });
 
-gulp.task('processhtml', ['clean'], function() {
-  gulp.src('src/index.html')
-    .pipe(processhtml({}))
-    .pipe(gulp.dest(paths.dist))
-    .on('error', gutil.log);
-});
-
-gulp.task('minifyhtml', ['clean'], function() {
-  gulp.src('dist/index.html')
-    .pipe(minifyhtml())
-    .pipe(gulp.dest(paths.dist))
-    .on('error', gutil.log);
-});
-
 gulp.task('lint', function() {
   return gulp.src(paths.js)
     .pipe(eslint({
@@ -83,25 +71,41 @@ gulp.task('lint', function() {
     .pipe(eslint.failOnError());
 });
 
-gulp.task('html', function(){
-  gulp.src('src/*.html')
-    .pipe(connect.reload())
+gulp.task('processhtml', ['clean'], function() {
+  gulp.src(paths.html)
+    .pipe(processhtml({}))
+    .pipe(gulp.dest(paths.dist))
     .on('error', gutil.log);
+});
+
+gulp.task('minifyhtml', ['clean'], function() {
+  gulp.src('dist/*.html')
+    .pipe(minifyhtml())
+    .pipe(gulp.dest(paths.dist))
+    .on('error', gutil.log);
+});
+
+gulp.task('reload', function(){
+  connect.reload();
 });
 
 gulp.task('connect', function () {
   connect.server({
-    root: [__dirname + '/src'],
-    host: '0.0.0.0',
+    root: paths.dist,
     port: 9000,
     livereload: true
   });
 });
 
 gulp.task('watch', function () {
-  gulp.watch(paths.js, ['lint']);
-  gulp.watch(['./src/index.html', paths.css, paths.js], ['html']);
+  gulp.watch(paths.js, ['uglify']);
+  gulp.watch(paths.html, ['html']);
+  gulp.watch(paths.css, ['minifycss']);
+  gulp.watch(paths.libs, ['copy-vendor']);
+  gulp.watch(paths.assets, ['copy-assets']);
+  gulp.watch([paths.js, paths.html, paths.css, 
+               paths.libs, paths.assets], ['reload']);
 });
 
-gulp.task('default', ['connect', 'watch']);
-gulp.task('build', ['copy-assets', 'copy-vendor', 'uglify', 'minifycss', 'processhtml', 'minifyhtml']);
+gulp.task('default', ['build', 'connect', 'watch']);
+gulp.task('build', ['clean', 'copy-assets', 'copy-vendor', 'uglify', 'minifycss', 'processhtml', 'minifyhtml']);
