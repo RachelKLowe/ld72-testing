@@ -1,7 +1,7 @@
 var window;
 var Phaser;
 
-window.onload = function () {
+window.onload = () => {
   "use strict";
 
   var game

@@ -1,18 +1,18 @@
 var window;
 var Phaser;
 
-(function () {
+(function() {
   "use strict";
 
   function Boot() {}
 
   Boot.prototype = {
 
-    preload: function () {
+    preload() {
       this.load.image("preloader", "assets/preloader.gif");
     },
 
-    create: function () {
+    create() {
       this.game.input.maxPointers = 1;
 
       if (this.game.device.desktop) {
