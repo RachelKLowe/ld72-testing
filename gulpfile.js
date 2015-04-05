@@ -60,6 +60,16 @@ gulp.task('minifycss', ['clean'], function () {
     .on('error', gutil.log);
 });
 
+gulp.task('dev_lint', function() {
+  return gulp.src(paths.js)
+    .pipe(eslint({
+      evs: [
+          'es6'
+      ]
+    }))
+    .pipe(eslint.format())
+});
+
 gulp.task('lint', function() {
   return gulp.src(paths.js)
     .pipe(eslint({
@@ -74,12 +84,6 @@ gulp.task('lint', function() {
 gulp.task('processhtml', ['clean'], function() {
   gulp.src(paths.html)
     .pipe(processhtml({}))
-    .pipe(gulp.dest(paths.dist))
-    .on('error', gutil.log);
-});
-
-gulp.task('minifyhtml', ['clean'], function() {
-  gulp.src('dist/*.html')
     .pipe(minifyhtml())
     .pipe(gulp.dest(paths.dist))
     .on('error', gutil.log);
@@ -98,14 +102,10 @@ gulp.task('connect', function () {
 });
 
 gulp.task('watch', function () {
-  gulp.watch(paths.js, ['uglify']);
-  gulp.watch(paths.html, ['html']);
-  gulp.watch(paths.css, ['minifycss']);
-  gulp.watch(paths.libs, ['copy-vendor']);
-  gulp.watch(paths.assets, ['copy-assets']);
   gulp.watch([paths.js, paths.html, paths.css, 
-               paths.libs, paths.assets], ['reload']);
+               paths.libs, paths.assets], ['dev_build', 'reload']);
 });
 
-gulp.task('default', ['build', 'connect', 'watch']);
-gulp.task('build', ['clean', 'copy-assets', 'copy-vendor', 'uglify', 'minifycss', 'processhtml', 'minifyhtml']);
+gulp.task('default', ['dev_build', 'connect', 'watch']);
+gulp.task('dev_build', ['clean', 'dev_lint', 'copy-assets', 'copy-vendor', 'uglify', 'minifycss', 'processhtml']);
+gulp.task('build', ['clean', 'lint', 'copy-assets', 'copy-vendor', 'uglify', 'minifycss', 'processhtml']);

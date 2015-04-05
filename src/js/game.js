@@ -1,5 +1,7 @@
+var window;
+
 (function() {
-  'use strict';
+  "use strict";
 
   function Game() {
     this.player = null;
@@ -11,7 +13,7 @@
       var x = this.game.width / 2
         , y = this.game.height / 2;
 
-      this.player = this.add.sprite(x, y, 'player');
+      this.player = this.add.sprite(x, y, "player");
       this.player.anchor.setTo(0.5, 0.5);
       this.input.onDown.add(this.onInputDown, this);
     },
@@ -36,12 +38,12 @@
     },
 
     onInputDown: function () {
-      this.game.state.start('menu');
+      this.game.state.start("menu");
     }
 
   };
 
-  window['ld72'] = window['ld72'] || {};
-  window['ld72'].Game = Game;
+  window.ld72 = window.ld72 || {};
+  window.ld72.Game = Game;
 
 }());
