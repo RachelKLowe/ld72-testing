@@ -19,6 +19,7 @@
     "gulp-processhtml": "*",
     "gulp-eslint": "*",
     "gulp-babel": "*",
+    "gulp-sourcemaps": "*",
     "gulp-uglify": "*",
     "gulp-connect": "*",
     "gulp-watch": "*",

@@ -8,6 +8,7 @@ var gulp = require('gulp')
   , processhtml = require('gulp-processhtml')
   , eslint = require('gulp-eslint')
   , babel = require('gulp-babel')
+  , sourcemaps = require('gulp-sourcemaps')
   , uglify = require('gulp-uglify')
   , connect = require('gulp-connect')
   , paths;
@@ -42,20 +43,24 @@ gulp.task('copy-vendor', ['clean'], function () {
 
 gulp.task('uglify', ['clean'], function () {
   gulp.src(paths.js)
+    .pipe(sourcemaps.init())
     .pipe(babel())
     .pipe(concat('main.min.js'))
     .pipe(gulp.dest(paths.dist))
-    .pipe(uglify({outSourceMaps: false}))
+    .pipe(uglify())
+    .pipe(sourcemaps.write('.'))
     .pipe(gulp.dest(paths.dist));
 });
 
 gulp.task('minifycss', ['clean'], function () {
  gulp.src(paths.css)
+    .pipe(sourcemaps.init())
     .pipe(minifycss({
       keepSpecialComments: false,
       removeEmpty: true
     }))
     .pipe(rename({suffix: '.min'}))
+    .pipe(sourcemaps.write('.'))
     .pipe(gulp.dest(paths.dist))
     .on('error', gutil.log);
 });
