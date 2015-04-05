@@ -10,7 +10,7 @@ var window;
 
   Menu.prototype = {
 
-    create: function () {
+    create() {
       var x = this.game.width / 2
         , y = this.game.height / 2;
 
@@ -27,11 +27,11 @@ var window;
       this.input.onDown.add(this.onDown, this);
     },
 
-    update: function () {
+    update() {
 
     },
 
-    onDown: function () {
+    onDown() {
       this.game.state.start("game");
     }
   };

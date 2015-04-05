@@ -68,7 +68,7 @@ gulp.task('minifycss', ['clean'], function () {
 gulp.task('dev_lint', function() {
   return gulp.src(paths.js)
     .pipe(eslint({
-      evs: [
+      envs: [
           'es6'
       ]
     }))

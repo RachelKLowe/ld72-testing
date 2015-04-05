@@ -9,7 +9,7 @@ var window;
 
   Game.prototype = {
 
-    create: function () {
+    create() {
       var x = this.game.width / 2
         , y = this.game.height / 2;
 
@@ -18,7 +18,7 @@ var window;
       this.input.onDown.add(this.onInputDown, this);
     },
 
-    update: function () {
+    update() {
       var x, y, cx, cy, dx, dy, angle, scale;
 
       x = this.input.position.x;
@@ -37,7 +37,7 @@ var window;
       this.player.scale.y = scale * 0.6;
     },
 
-    onInputDown: function () {
+    onInputDown() {
       this.game.state.start("menu");
     }
 

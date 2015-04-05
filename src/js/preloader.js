@@ -10,7 +10,7 @@ var window;
 
   Preloader.prototype = {
 
-    preload: function () {
+    preload() {
       this.asset = this.add.sprite(this.game.width * 0.5 - 110, this.game.height * 0.5 - 10, "preloader");
 
       this.load.onLoadComplete.addOnce(this.onLoadComplete, this);
@@ -19,22 +19,22 @@ var window;
       this.loadResources();
     },
 
-    loadResources: function () {
+    loadResources() {
       this.load.image("player", "assets/player.png");
       this.load.bitmapFont("minecraftia", "assets/minecraftia.png", "assets/minecraftia.xml");
     },
 
-    create: function () {
+    create() {
       this.asset.cropEnabled = false;
     },
 
-    update: function () {
+    update() {
       if (this.ready) {
         this.game.state.start("menu");
       }
     },
 
-    onLoadComplete: function () {
+    onLoadComplete() {
       this.ready = true;
     }
   };
