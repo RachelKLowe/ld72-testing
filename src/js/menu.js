@@ -3,12 +3,11 @@ var window;
 (function() {
   "use strict";
 
-  function Menu() {
-    this.titleTxt = null;
-    this.startTxt = null;
-  }
-
-  Menu.prototype = {
+  class Menu {
+    constructor() {
+      this.titleTxt = null;
+      this.startTxt = null;
+    }
 
     create() {
       var x = this.game.width / 2
@@ -25,16 +24,16 @@ var window;
       this.startTxt.x = this.game.width / 2 - this.startTxt.textWidth / 2;
 
       this.input.onDown.add(this.onDown, this);
-    },
+    }
 
     update() {
 
-    },
+    }
 
     onDown() {
       this.game.state.start("game");
     }
-  };
+  }
 
   window.ld72 = window.ld72 || {};
   window.ld72.Menu = Menu;

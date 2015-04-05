@@ -3,11 +3,10 @@ var window;
 (function() {
   "use strict";
 
-  function Game() {
-    this.player = null;
-  }
-
-  Game.prototype = {
+  class Game {
+    constructor() {
+      this.player = null;
+    }
 
     create() {
       var x = this.game.width / 2
@@ -16,7 +15,7 @@ var window;
       this.player = this.add.sprite(x, y, "player");
       this.player.anchor.setTo(0.5, 0.5);
       this.input.onDown.add(this.onInputDown, this);
-    },
+    }
 
     update() {
       var x, y, cx, cy, dx, dy, angle, scale;
@@ -35,13 +34,13 @@ var window;
 
       this.player.scale.x = scale * 0.6;
       this.player.scale.y = scale * 0.6;
-    },
+    }
 
     onInputDown() {
       this.game.state.start("menu");
     }
 
-  };
+  }
 
   window.ld72 = window.ld72 || {};
   window.ld72.Game = Game;

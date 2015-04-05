@@ -4,13 +4,10 @@ var Phaser;
 (function() {
   "use strict";
 
-  function Boot() {}
-
-  Boot.prototype = {
-
+  class Boot {
     preload() {
       this.load.image("preloader", "assets/preloader.gif");
-    },
+    }
 
     create() {
       this.game.input.maxPointers = 1;
@@ -29,7 +26,7 @@ var Phaser;
       }
       this.game.state.start("preloader");
     }
-  };
+  }
 
   window.ld72 = window.ld72 || {};
   window.ld72.Boot = Boot;
