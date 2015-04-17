@@ -23,6 +23,7 @@ var paths = {
   css:    'src/css/*.css',
   html:   'src/*.html',
   libs:   [
+    'bower_components/phaser-official/build/phaser.js',
     'bower_components/phaser-official/build/phaser.min.js',
     'bower_components/phaser-official/build/phaser.map'
   ],
