@@ -1,76 +1,116 @@
-var gulp = require('gulp')
-  , gutil = require('gulp-util')
-  , del = require('del')
-  , concat = require('gulp-concat')
-  , rename = require('gulp-rename')
-  , minifycss = require('gulp-minify-css')
-  , minifyhtml = require('gulp-minify-html')
-  , processhtml = require('gulp-processhtml')
-  , eslint = require('gulp-eslint')
-  , babel = require('gulp-babel')
-  , sourcemaps = require('gulp-sourcemaps')
-  , uglify = require('gulp-uglify')
-  , connect = require('gulp-connect')
-  , paths;
 
-paths = {
+var gutil = require('gulp-util');
+var eslint = require('gulp-eslint');
+var babel = require('babelify');
+var browserify = require('browserify');
+var browserSync = require('browser-sync');
+var buffer = require('vinyl-buffer');
+var gulp = require('gulp');
+var less = require('gulp-less');
+var minifyCss = require('gulp-minify-css');
+var path = require('path');
+var reload = browserSync.reload;
+var rimraf = require('rimraf');
+var runSequence = require('run-sequence');
+var source = require('vinyl-source-stream');
+var sourcemaps = require('gulp-sourcemaps');
+var uglify = require('gulp-uglify');
+var minifyhtml = require('gulp-minify-html');
+var watchify = require('watchify');
+
+var paths = {
   assets: 'src/assets/**/*',
   css:    'src/css/*.css',
   html:   'src/*.html',
   libs:   [
-    'src/bower_components/phaser-official/build/phaser.min.js',
-    'src/bower_components/phaser-official/build/phaser.map'
+    'bower_components/phaser-official/build/phaser.min.js',
+    'bower_components/phaser-official/build/phaser.map'
   ],
   js:     ['src/js/**/*.js'],
   dist:   './dist/'
 };
 
-gulp.task('clean', function (cb) {
-  del([paths.dist], cb);
+
+gulp.task('clean', function (callback) {
+  rimraf(paths.dist, callback);
 });
 
-gulp.task('copy-assets', ['clean'], function () {
+function compile(watch) {
+  var bundler = watchify(
+    browserify('./src/js/main.js', {
+      debug: true,
+      paths: ['./src/js/'],
+      external: './src/js/**/*.js',
+      transform: ['browserify-shim']
+    }).transform(babel)
+  );
+
+  function rebundle() {
+    return bundler.bundle()
+      .on('error', function(err) { console.error(err); this.emit('end'); })
+      .pipe(source('bundle.js'))
+      .pipe(buffer())
+      .pipe(sourcemaps.init({loadMaps: true}))
+
+      // uglifyjs strips out debugger statements (option for this added in
+      // uglifyjs2).
+      // For now, comment out uglify, but should probably use process.env to
+      // switch on/off.
+      //.pipe(uglify())
+
+      .pipe(sourcemaps.write('./'))
+      .pipe(gulp.dest('./dist/js'));
+  }
+
+  if (watch) {
+    bundler.on('update', function() {
+      console.log('-> bundling...');
+      rebundle().pipe(reload({stream: true}));
+    });
+  }
+
+  return rebundle();
+}
+
+function watch() {
+  return compile(true);
+}
+
+gulp.task('js', compile);
+
+gulp.task('copy-assets', function () {
   gulp.src(paths.assets)
     .pipe(gulp.dest(paths.dist + 'assets'))
     .on('error', gutil.log);
 });
 
-gulp.task('copy-vendor', ['clean'], function () {
+gulp.task('copy-vendor', function () {
   gulp.src(paths.libs)
-    .pipe(gulp.dest(paths.dist))
+    .pipe(gulp.dest('./dist/js/vendor'))
     .on('error', gutil.log);
 });
 
-gulp.task('uglify', ['clean'], function () {
-  gulp.src(paths.js)
+gulp.task('styles', function () {
+  return gulp.src('src/styles/main.less')
     .pipe(sourcemaps.init())
-    .pipe(babel())
-    .pipe(concat('main.min.js'))
-    .pipe(gulp.dest(paths.dist))
-    .pipe(uglify())
-    .pipe(sourcemaps.write('.'))
-    .pipe(gulp.dest(paths.dist));
-});
-
-gulp.task('minifycss', ['clean'], function () {
- gulp.src(paths.css)
-    .pipe(sourcemaps.init())
-    .pipe(minifycss({
-      keepSpecialComments: false,
-      removeEmpty: true
+    .pipe(less({
+      // The less-clean-css plugin currently breaks during sourcemap
+      // generation, but we should switch to that from gulp-minify-css once it
+      // is fixed.
+      plugins: [],
+      paths: []
     }))
-    .pipe(rename({suffix: '.min'}))
-    .pipe(sourcemaps.write('.'))
-    .pipe(gulp.dest(paths.dist))
-    .on('error', gutil.log);
+    .pipe(minifyCss())
+    .pipe(sourcemaps.write('./'))
+    .pipe(gulp.dest('./dist/styles'))
+    .pipe(reload({stream: true}));
 });
+
 
 gulp.task('dev_lint', function() {
   return gulp.src(paths.js)
     .pipe(eslint({
-      envs: [
-          'es6'
-      ]
+      envs: ['es6']
     }))
     .pipe(eslint.format())
 });
@@ -78,39 +118,38 @@ gulp.task('dev_lint', function() {
 gulp.task('lint', function() {
   return gulp.src(paths.js)
     .pipe(eslint({
-      envs: [
-          'es6'
-      ]
+      envs: ['es6']
     }))
     .pipe(eslint.format())
     .pipe(eslint.failOnError());
 });
 
-gulp.task('processhtml', ['clean'], function() {
-  gulp.src(paths.html)
-    .pipe(processhtml({}))
+gulp.task('html', function() {
+  return gulp.src(paths.html)
     .pipe(minifyhtml())
-    .pipe(gulp.dest(paths.dist))
-    .on('error', gutil.log);
+    .pipe(gulp.dest('dist'))
+    .pipe(reload({stream: true}));
 });
 
-gulp.task('reload', function(){
-  connect.reload();
+gulp.task('build', function (callback) {
+  runSequence('clean', ['lint', 'copy-assets', 'copy-vendor', 'html', 'js', 'styles'], callback);
 });
 
-gulp.task('connect', function () {
-  connect.server({
-    root: paths.dist,
-    port: 9000,
-    livereload: true
+gulp.task('build', function (callback) {
+  runSequence('clean', ['dev_lint', 'copy-assets', 'copy-vendor', 'html', 'js', 'styles'], callback);
+});
+
+gulp.task('browser-sync', function() {
+  browserSync({
+    server: './dist'
   });
+  gulp.watch('src/styles/**/*.less', ['styles']);
+  gulp.watch('src/*.html', ['html']);
+  return watch();
 });
 
-gulp.task('watch', function () {
-  gulp.watch([paths.js, paths.html, paths.css, 
-               paths.libs, paths.assets], ['dev_build', 'reload']);
+gulp.task('serve', function (callback) {
+  runSequence('build', 'browser-sync', callback);
 });
 
-gulp.task('default', ['dev_build', 'connect', 'watch']);
-gulp.task('dev_build', ['clean', 'dev_lint', 'copy-assets', 'copy-vendor', 'uglify', 'minifycss', 'processhtml']);
-gulp.task('build', ['clean', 'lint', 'copy-assets', 'copy-vendor', 'uglify', 'minifycss', 'processhtml']);
+gulp.task('default', ['serve']);
